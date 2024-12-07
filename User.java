@@ -1,34 +1,48 @@
 public class User {
-    private int accountNumber;
-    private int pin;
+    private String username;
+    private String fullname;
+    private int accountNumber; // primary
+    private String password;
+    private int balance;
+    private String bankName; // foreign
 
-    // Konstruktor untuk membuat objek User
-    public User(int accountNumber, int pin) {
+    public User(int accountNumber, String password, String username, String fullname, String bankName, int balance) {
+        this.username = username;
+        this.fullname = fullname;
         this.accountNumber = accountNumber;
-        this.pin = pin;
+        this.password = password;
+        this.bankName = bankName;
+        this.balance = balance;
+    }
+    public String getBankName() {
+        return bankName;
     }
 
-    // Getter untuk accountNumber
+    public String getUsername() {
+        return username;
+    }
+
+    public String getFullname() {
+        return fullname;
+    }
+
     public int getAccountNumber() {
         return accountNumber;
     }
 
-    // Getter untuk PIN
-    public int getPin() {
-        return pin;
+    public String getPassword() {
+        return password;
     }
 
-    // Override equals untuk membandingkan objek User berdasarkan nomor rekening dan PIN
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        User user = (User) obj;
-        return accountNumber == user.accountNumber && pin == user.pin;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(accountNumber) * 31 + Integer.hashCode(pin);
+    public int getBalance() {
+        return balance;
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
     }
 }
