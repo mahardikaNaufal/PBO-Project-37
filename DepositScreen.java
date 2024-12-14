@@ -1,3 +1,5 @@
+package view;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -5,46 +7,24 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+
+import model.Transaction;
+import model.User;
+import repository.TransactionDB;
+import repository.UserDB;
 
 import java.awt.*;
-
-import java.awt.event.*;
-
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class DepositScreen {
-    private static Timer idleTimer;
-
-    private static void startIdleTimer(JFrame frame) {
-        idleTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                // Menampilkan notifikasi setelah 5 detik idle
-                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(frame, "Mouse tidak digerakkan selama 5 detik!", "Idle Notification", JOptionPane.INFORMATION_MESSAGE));
-            }
-        }, 5000); // 5000 ms = 5 detik
-    }
-
-    private static void resetIdleTimer(JFrame frame) {
-        // Batalkan timer lama
-        idleTimer.cancel();
-
-        // Buat timer baru
-        idleTimer = new Timer();
-        startIdleTimer(frame);
-    }
-
-    DepositScreen(User user, SmartAtmDatabase database, JFrame mainMenuFrame) {
-        JFrame depositFrame = new JFrame("Setor Tunai");
-
+public class DepositScreen extends JFrame {
+    DepositScreen(User user, JFrame mainMenuFrame) {
         // Mendapatkan ukuran layar
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        depositFrame.setSize(screenSize.width, screenSize.height);
-        depositFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        depositFrame.setLayout(null);
+
+        setTitle("Setor Tunai");
+        setSize(screenSize.width, screenSize.height);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(null);
 
         JPanel depositPanel = new JPanel();
         depositPanel.setLayout(null);
@@ -91,58 +71,27 @@ public class DepositScreen {
         depositPanel.add(enterButton);
 
         // Tambahkan event listener untuk tombol
-        backButton.addActionListener(e -> depositFrame.dispose()); // Kembali ke menu utama
+        backButton.addActionListener(e -> DepositScreen.this.dispose()); // Kembali ke menu utama
 
         enterButton.addActionListener(e -> {
             int amount = Integer.parseInt(amountField.getText());
             user.setBalance(amount + user.getBalance());
 
-            database.updateUser(user);
+            UserDB.updateUser(user);
 
-            database.insertTransaction("Setor", amount,  java.time.LocalDateTime.now().toString(), user.getBankName(), user.getAccountNumber());
+            TransactionDB.insertTransaction("Setor", amount,  java.time.LocalDateTime.now().toString(), user.getBankName(), user.getAccountNumber(), user.getAccountNumber());
 
-            depositFrame.dispose();
-            JOptionPane.showMessageDialog(depositFrame, "Jumlah uang disetor: " + amount);
+            dispose();
+            JOptionPane.showMessageDialog(DepositScreen.this, "Jumlah uang disetor: " + amount);
 
-            ArrayList<Transaction> transactions = database.getTransactions();
+            ArrayList<Transaction> transactions = TransactionDB.getTransactions();
 
             mainMenuFrame.dispose();
-            new ShowMainMenu(user, transactions);
-            // String amount = amountField.getText().trim();
-            // if (amount.isEmpty() || amount.equals("RP.")) {
-            //     JOptionPane.showMessageDialog(depositFrame, "Jumlah uang tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
-            // } else {
-            //     JOptionPane.showMessageDialog(depositFrame, "Jumlah uang diterima: " + amount);
-            //     depositFrame.dispose();
-
-            //     // Panggil layar konfirmasi PIN
-            //     KonfirmasiPIN.showPINConfirmationScreen(depositFrame);
-            // }
+            new MenuScreen(user, transactions);
         });
 
-        // // Timer untuk mendeteksi idle
-        // idleTimer = new Timer();
-
-        // // Reset timer ketika mouse digerakkan
-        // depositFrame.addMouseMotionListener(new MouseMotionAdapter() {
-        //     @Override
-        //     public void mouseMoved(MouseEvent e) {
-        //         resetIdleTimer(depositFrame);
-        //     }
-        // });
-
-        // // Reset timer ketika mouse diklik
-        // depositFrame.addMouseListener(new MouseAdapter() {
-        //     @Override
-        //     public void mouseClicked(MouseEvent e) {
-        //         resetIdleTimer(depositFrame);
-        //     }
-        // });
-
-        // // Mulai timer idle
-        // startIdleTimer(depositFrame);
-
-        depositFrame.add(depositPanel);
-        depositFrame.setVisible(true);
+        add(depositPanel);
+        setVisible(true);
     }
 }
+
